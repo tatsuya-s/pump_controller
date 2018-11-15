@@ -110,6 +110,7 @@ void PumpController::controlPump(const pump_controller::ControlPumpGoal::ConstPt
         if (duration.sec >= goal->time) 
         {
             success = true;
+            break;
         }
 
         feedback.time = static_cast<double>(duration.sec);
