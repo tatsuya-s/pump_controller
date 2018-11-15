@@ -22,7 +22,10 @@ PumpController::PumpController() :
     this->private_nh.getParam("rasp_addr", this->rasp_addr);
     this->private_nh.getParam("rasp_port", this->rasp_port);
 
-    this->pi = pigpio_start(const_cast<char*>(this->rasp_addr.c_str()), const_cast<char*>(this->rasp_port.c_str()));
+    char* char_addr = this->rasp_addr.length() > 0 ? const_cast<char*>(this->rasp_addr.c_str()) : NULL;
+    char* char_port = this->rasp_port.length() > 0 ? const_cast<char*>(this->rasp_port.c_str()) : NULL;
+    ROS_INFO("IP address: %s, Port: %s\n", char_addr, char_port);
+    this->pi = pigpio_start(char_addr, char_port);
 
     if (this->pi < 0)
     {

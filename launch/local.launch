@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="pump_controller" type="pump_controller_node" name="pump_controller_node" output="screen"/>
+</launch>
