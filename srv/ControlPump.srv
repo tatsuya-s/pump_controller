@@ -1,0 +1,7 @@
+bool direction
+int64 frequency
+int64 time
+---
+bool success
+int64 revolution
+float64 time

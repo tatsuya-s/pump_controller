@@ -1,0 +1,12 @@
+#goal definition
+bool direction
+int64 frequency
+int64 time
+---
+#result definition
+int64 revolution
+float64 time
+---
+#feedback
+int64 revolution
+float64 time
