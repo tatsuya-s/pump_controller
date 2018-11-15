@@ -1,5 +1,5 @@
 <launch>
-    <arg name="rasp_addr" default="192.168.10.10"/>
+    <arg name="rasp_addr" default="raspberrypi.local"/>
     <arg name="rasp_port" default="8888"/>
 
     <node pkg="pump_controller" type="pump_controller_node" name="pump_controller_node" output="screen">
