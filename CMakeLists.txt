@@ -14,7 +14,7 @@ find_package(
 )
 
 find_package(Threads REQUIRED)
-find_package(pigpio)
+find_package(pigpio QUIET)
 if(NOT pigpio_FOUND)
   add_subdirectory(pigpio)
   set(pigpio_INCLUDE_DIR pigpio)
