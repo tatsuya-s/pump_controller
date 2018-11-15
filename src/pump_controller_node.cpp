@@ -107,7 +107,7 @@ void PumpController::controlPump(const pump_controller::ControlPumpGoal::ConstPt
 
         duration = ros::Time::now() - start_time;
 
-        if (duration.sec > goal->time) 
+        if (duration.sec >= goal->time) 
         {
             success = true;
         }
@@ -118,6 +118,9 @@ void PumpController::controlPump(const pump_controller::ControlPumpGoal::ConstPt
 
         rate.sleep();
     }
+
+    gpio_write(this->pi, this->ena_pin, PI_OFF);
+    hardware_PWM(this->pi, this->pwm_pin, 0, 0);
 
     if (success)
     {
