@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pump_controller)
 
+set(CMAKE_CXX_FLAGS "-std=c++11")
+
 include(pigpio/util/Findpigpio.cmake)
 
 find_package(
