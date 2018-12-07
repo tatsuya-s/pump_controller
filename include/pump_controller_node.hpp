@@ -19,7 +19,7 @@ class PumpController
 
     private:
         ros::NodeHandle nh, private_nh;
-        boost::shared_ptr<actionlib::SimpleActionServer<pump_controller::ControlPumpAction>> pump_action_server;
+        actionlib::SimpleActionServer<pump_controller::ControlPumpAction> pump_action_server;
         ros::ServiceServer set_port_srv;
         int pi;
         int ena_pin; // 1=ON, 0=OFF
