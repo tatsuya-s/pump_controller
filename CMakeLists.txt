@@ -42,8 +42,6 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS
     include
-  LIBRARIES
-    pump_controller
   CATKIN_DEPENDS
     roscpp
     rospy

@@ -8,6 +8,7 @@ PumpController::PumpController() :
     pwm_pin(18), 
     pwm_duty(500000), // 50%
     step_angle(1.8), 
+    use_const_vel(true), 
     rasp_addr(""), 
     rasp_port("")
 {
@@ -19,6 +20,7 @@ PumpController::PumpController() :
     this->private_nh.getParam("pwm_pin", this->pwm_pin);
     this->private_nh.getParam("pwm_duty", this->pwm_duty);
     this->private_nh.getParam("step_angle", this->step_angle);
+    this->private_nh.getParam("use_const_vel", this->use_const_vel);
     this->private_nh.getParam("rasp_addr", this->rasp_addr);
     this->private_nh.getParam("rasp_port", this->rasp_port);
 
@@ -86,6 +88,7 @@ void PumpController::controlPump(const pump_controller::ControlPumpGoal::ConstPt
 {
     pump_controller::ControlPumpFeedback feedback;
     pump_controller::ControlPumpResult result;
+    bool is_first = true;
     bool success = false;
     ros::Rate rate(1000);
     ros::Time start_time = ros::Time::now();
@@ -105,19 +108,32 @@ void PumpController::controlPump(const pump_controller::ControlPumpGoal::ConstPt
 
         duration = ros::Time::now() - start_time;
 
-        if (wake_up_time > duration.toSec()) 
+        if (use_const_vel) 
         {
-            frequency = goal->frequency * (0.5 - 0.5 * std::cos(duration.toSec() / wake_up_time * M_PI));
-            gpio_write(this->pi, this->ena_pin, PI_ON);
-            gpio_write(this->pi, this->dir_pin, goal->direction);
-            hardware_PWM(this->pi, this->pwm_pin, frequency, this->pwm_duty);
+            if (is_first) 
+            {
+                gpio_write(this->pi, this->ena_pin, PI_ON);
+                gpio_write(this->pi, this->dir_pin, goal->direction);
+                hardware_PWM(this->pi, this->pwm_pin, goal->frequency, this->pwm_duty);
+                is_first = false;
+            }
         }
-        else if (duration.toSec() > fall_asleep_time) 
+        else 
         {
-            frequency = goal->frequency * (0.5 + 0.5 * std::cos((duration.toSec() - fall_asleep_time) / wake_up_time * M_PI));
-            gpio_write(this->pi, this->ena_pin, PI_ON);
-            gpio_write(this->pi, this->dir_pin, goal->direction);
-            hardware_PWM(this->pi, this->pwm_pin, frequency, this->pwm_duty);
+            if (wake_up_time > duration.toSec()) 
+            {
+                frequency = goal->frequency * (0.5 - 0.5 * std::cos(duration.toSec() / wake_up_time * M_PI));
+                gpio_write(this->pi, this->ena_pin, PI_ON);
+                gpio_write(this->pi, this->dir_pin, goal->direction);
+                hardware_PWM(this->pi, this->pwm_pin, frequency, this->pwm_duty);
+            }
+            else if (duration.toSec() > fall_asleep_time) 
+            {
+                frequency = goal->frequency * (0.5 + 0.5 * std::cos((duration.toSec() - fall_asleep_time) / wake_up_time * M_PI));
+                gpio_write(this->pi, this->ena_pin, PI_ON);
+                gpio_write(this->pi, this->dir_pin, goal->direction);
+                hardware_PWM(this->pi, this->pwm_pin, frequency, this->pwm_duty);
+            }
         }
 
         if (duration.toSec() >= goal->time) 

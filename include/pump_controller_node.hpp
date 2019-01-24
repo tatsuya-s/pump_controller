@@ -29,6 +29,7 @@ class PumpController
         double step_angle;
         std::string rasp_addr;
         std::string rasp_port;
+        bool use_const_vel;
 };
 
 #endif // PUMP_CONTROLLER_NODE_HPP
