@@ -11,7 +11,7 @@ def pump_client():
 
     client.wait_for_server()
 
-    goal = pump_controller.msg.ControlPumpGoal(direction=False, frequency=300, time=1.0) # 300-800
+    goal = pump_controller.msg.ControlPumpGoal(direction=True, frequency=300, time=5.0) # 300-800
     client.send_goal(goal)
 
     client.wait_for_result()
