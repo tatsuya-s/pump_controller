@@ -4,6 +4,7 @@ PumpController::PumpController() :
     private_nh("~"),
     pump_action_server(nh, "pump_action", boost::bind(&PumpController::controlPump, this, _1), false),
     step_angle(1.8),
+    frequency(300),
     rasp_addr(""),
     rasp_port(""),
     serial_tty("/dev/ttyUSB0")
@@ -12,6 +13,7 @@ PumpController::PumpController() :
     this->set_port_srv = this->nh.advertiseService("control_pump", &PumpController::controlPump, this);
 
     this->private_nh.getParam("step_angle", this->step_angle);
+    this->private_nh.getParam("frequency", this->frequency);
     this->private_nh.getParam("rasp_addr", this->rasp_addr);
     this->private_nh.getParam("rasp_port", this->rasp_port);
     this->private_nh.getParam("serial_tty", this->serial_tty);
@@ -47,16 +49,15 @@ bool PumpController::controlPump(pump_controller::ControlPump::Request &req,
 {
     try
     {
-        const int value = static_cast<int>(std::round(req.frequency * req.time)) * (req.direction ? 1 : -1);
+        const int value = req.pulse * (req.direction ? 1 : -1);
         std::string data = std::to_string(value) + "\n";
         serial_write(this->pi, this->handle, const_cast<char*>(data.c_str()), data.size());
 
-        ros::Time start_time = ros::Time::now();
-        ros::Duration(req.time).sleep();
-        ros::Duration duration = ros::Time::now() - start_time;
+        const double duration = req.pulse / this->frequency;
+        ros::Duration(duration).sleep();
 
         res.success = true;
-        res.time = duration.toSec();
+        res.time = duration;
         res.revolution = this->step_angle / 360 * value;
     }
     catch(...)
@@ -82,7 +83,8 @@ void PumpController::controlPump(const pump_controller::ControlPumpGoal::ConstPt
     ros::Time start_time = ros::Time::now();
     ros::Duration duration;
 
-    const int total_value = static_cast<int>(std::round(goal->frequency * goal->time)) * (goal->direction ? 1 : -1);
+    const double total_time = goal->pulse / this->frequency;
+    const int total_value = goal->pulse * (goal->direction ? 1 : -1);
 
     while (ros::ok())
     {
@@ -102,15 +104,14 @@ void PumpController::controlPump(const pump_controller::ControlPumpGoal::ConstPt
             is_first = false;
         }
 
-        if (duration.toSec() >= goal->time)
+        if (duration.toSec() >= total_time)
         {
             success = true;
             break;
         }
 
         feedback.time = duration.toSec();
-        const int curr_value = static_cast<int>(std::round(goal->frequency * feedback.time)) * (goal->direction ? 1 : -1);
-        feedback.revolution = this->step_angle / 360 * curr_value;
+        feedback.revolution = this->step_angle / 360 * (feedback.time * this->frequency) * (goal->direction ? 1 : -1);
         this->pump_action_server.publishFeedback(feedback);
 
         rate.sleep();

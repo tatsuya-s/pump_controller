@@ -23,6 +23,7 @@ class PumpController
         ros::ServiceServer set_port_srv;
         int pi;
         double step_angle;
+        double frequency;
         std::string rasp_addr;
         std::string rasp_port;
         std::string serial_tty;

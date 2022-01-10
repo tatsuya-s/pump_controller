@@ -1,6 +1,5 @@
 bool direction
-int64 frequency
-float64 time
+int64 pulse
 ---
 bool success
 float64 revolution

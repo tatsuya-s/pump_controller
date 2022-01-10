@@ -1,7 +1,6 @@
 #goal definition
 bool direction
-int64 frequency
-float64 time
+int64 pulse
 ---
 #result definition
 float64 revolution
